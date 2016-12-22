@@ -1,0 +1,9 @@
+﻿  Snake.cpp
+  Game.cpp
+c:\users\justin ramnandan\documents\visual studio 2015\projects\snakegame\snakegame\game.cpp(61): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+c:\users\justin ramnandan\documents\visual studio 2015\projects\snakegame\snakegame\game.cpp(68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Main.cpp
+  SnakeGame.vcxproj -> C:\Users\Justin Ramnandan\Documents\Visual Studio 2015\Projects\SnakeGame\Debug\SnakeGame.exe
+  SnakeGame.vcxproj -> C:\Users\Justin Ramnandan\Documents\Visual Studio 2015\Projects\SnakeGame\Debug\SnakeGame.pdb (Full PDB)
