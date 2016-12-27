@@ -4,62 +4,54 @@
 #include "SFML\Graphics.hpp"
 
 #include <list>
-
+// needed as paramters for certain functions therefore included
+class Borders;
+class Fruit;
 //function to create a body part
-static sf::RectangleShape drawBodyPart()
-{
-	sf::RectangleShape part;
-	part.setSize(sf::Vector2f(10, 10));
-	part.setFillColor(sf::Color::Green);
-
-	return part;
-}
 
 //enum to track direction moving
-enum Direction{LEFT,RIGHT,UP,DOWN};
-
-//body parts for the snake
-
-struct SnakeNode
+enum class Direction
 {
-	sf::RectangleShape bodyPart;
-	
-	SnakeNode()
-	{
-		bodyPart = drawBodyPart();
-		
-	}
-
+	Left,Right,Up,Down
 };
 
 
-
-
-
-//snake class
-class Snake
+//snake class inherits drawable and transformable
+class Snake : public sf::Drawable, public sf::Transformable
 {
-public:
+private:
+	// the snake list takes in these SnakeNodes / inherits from drawable and transformable
+	struct SnakeNode : public sf::Drawable, sf::Transformable
+	{
+		sf::RectangleShape bodyPart;
+		SnakeNode();
+
+			// Inherited via Drawable
+			virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
+
+	};
+	//snake list
 	std::list<SnakeNode> snake;
+	//enum to track direction of snake
 	Direction dir;
-	//want to track the x and y location of the head to track collision 
-	//working on the implementation of this
+public:
+	//constructor
+	Snake();
+	//updates position of the snake
+	void update();
+	// return the direction
+	Direction direction();
+	// sets the direction
+	Direction direction(Direction dir);
+	//check for collision with a border
+	bool collide( const Borders& border);
+	//checks for a collision with a fruit
+	bool collide(const Fruit& fruit);
 	
-	double xPos, yPos;
 
+	// Inherited via Drawable
+	virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
-	Snake(SnakeNode sn);
-	void changePosition();
-	Direction getPosition();
-	void move(double & xPos,double & yPos);
-	double getXPos();
-	double getYPos();
-	
-	
-	bool collide(sf::RectangleShape& topBorder, sf::RectangleShape& bottomBorder, sf::RectangleShape& leftBorder, sf::RectangleShape& rightBorder);
-
-	void grow();
-	
 };
 
 

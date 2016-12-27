@@ -1,116 +1,103 @@
 
 
 #include "Game.h"
+#include "Borders.h"
+#include "Fruit.h"
+#include "Snake.h"
 #include <iostream>
 
-void game(sf::RenderWindow& window)
-{
 
-	//set frame rate to 60 frames per second
-	window.setFramerateLimit(60);
+// text object
+void game()
+{
+	//creating the renderwindow
+	sf::RenderWindow window(sf::VideoMode(640, 480), "Snake");
+
+	//set frame rate to 10 frames per second
+
+	window.setFramerateLimit(10);
+
 	//variable to track different events that take place
 
 	//use this to draw the snake only the first time
 	bool firstIteration = true;
 	//fruit object
-	Fruit fruit;
-	//creating head of snake
-	SnakeNode head;
+	Fruit fruit(window);
+	
+	//borders object
+	Borders borders(window);
+	
 	//creating snake object
-	Snake snake(head);
-	double xPos = 0;
-	double yPos = 0;
-
-	// x position and y position of snake variables
-
-
-	sf::RectangleShape top = topBorder();
-	sf::RectangleShape left = leftBorder();
-	sf::RectangleShape bottom = bottomBorder();
-	sf::RectangleShape right = rightBorder();
+	Snake snake;
+	
+	snake.setPosition(static_cast<sf::Vector2f>(window.getSize()) / 2.f);
 
 	//main loop
-	//do this while the window is open
-	while (window.isOpen())
+	
+	while (window.isOpen() && !snake.collide(borders))
 	{
-
-		do
+		//do event handling first
+		sf::Event event;
+		while (window.pollEvent(event))
 		{
+
+			//if most recent event is close button close the window
+			switch (event.type)
+			{
+			case sf::Event::Closed:
+				window.close();
+				break;
+
+			case sf::Event::KeyReleased:
+				switch (event.key.code)
+				{
+				// change the direction the snake is going
+				case sf::Keyboard::Left:
+					snake.direction(Direction::Left);
+					break;
+
+				case sf::Keyboard::Right:
+					snake.direction(Direction::Right);
+					break;
+
+				case sf::Keyboard::Up:
+					snake.direction(Direction::Up);
+					break;
+
+				case sf::Keyboard::Down:
+					snake.direction(Direction::Down);
+					break;
+
+				//exits the program is esc key is pressed
+				case sf::Keyboard::Escape:
+					window.close();
+					break;
+				}
+			}
+		}
 			//clears the window
 			window.clear();
-			//draws the borders
-			//drawBorders(window);
-			//drawing the fruit
-
-			window.draw(top);
-			window.draw(left);
-			window.draw(bottom);
-			window.draw(right);
-
-			fruit.drawFruitToWindow(window);
+			// draws the fruit
+			window.draw(fruit);
 
 			//drawing the snake
+			window.draw(snake);
+			//draw the borders
+			window.draw(borders);
 
-			for (SnakeNode s : snake.snake)
+			// if snake collides with fruit reset the position of the fruit
+			//snake.collide function takes care of growing the snake
+			if (snake.collide(fruit))
 			{
-				//set the start position of the snake
-				if (firstIteration == true)
-				{
-					// try creating a setPosition function for the snake similiar to what you did for fruit
-					
-					s.bodyPart.setPosition(window.getSize().x / 2, window.getSize().y / 2);
-					xPos = window.getSize().x / 2;
-					yPos = window.getSize().y / 2;
-					
-				}
-				else {
-					//else set the position of the snake to the new position
-					s.bodyPart.setPosition(xPos, yPos);
+				fruit.setFruitPosition(window);
+			}
+			// deals with movement fo the snake
+			snake.update();
 
-
-				}
-				//draw the snake
-				window.draw(s.bodyPart);
-				
-
-				}
-					
-			    //set it to false after drawing the snake the first time
-				firstIteration = false;
-
-
-				sf::Event event;
-				//poll event pops the most recent event that has taken place
-				while (window.pollEvent(event))
-				{
-
-					//if most recent event is close button close the window
-					if (event.type == sf::Event::Closed)
-					{
-						window.close();
-					}
-
-				}
-				//detect for change in position
-				snake.changePosition();
-				
-				//move the snake and update the x and y coordinates
-				snake.move(xPos, yPos);
-
-				//display window
+				//display the content drawn to the window
 				window.display();
 
-
-			
-
-
-		} while (!snake.collide(top, bottom, left,right));
-
-		//keeps printing this in an infinite loop?
-
-		if (snake.collide(top,bottom,left,right) == true)
-		{
-			std::cout << "Game Over" << std::endl;
-		}
 	}
+
+	
 }

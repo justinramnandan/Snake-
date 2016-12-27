@@ -1,142 +1,139 @@
-
 #include "Snake.h"
+#include "Borders.h"
+#include "Fruit.h"
 
-//constructor for snake 
-//inserts a snakeNode at the beginning of snake
+//construcor for SnakeNode
+Snake::SnakeNode::SnakeNode()
+	:bodyPart({10, 10})
+{
 
-Snake::Snake(SnakeNode sn)
+}
+//constructof for snake
+Snake::Snake()
+	:dir(Direction::Left)
 {
 	//insert first body part
-	snake.insert(snake.end(), sn);
+	snake.emplace_front();
 	
 }
 
 
-double Snake::getXPos()
-{
-	return xPos;
-}
 
-double Snake::getYPos()
-{
-	return yPos;
-}
-
-//detcts for changes in derections using direction enum
-void Snake::changePosition()
-{
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-	{
-		dir = UP;
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	{
-		dir = DOWN;
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		dir = LEFT;
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		dir = RIGHT;
-	}
-}
-
-
-
-Direction Snake::getPosition()
+Direction Snake::direction()
 {
 	return dir;
 }
 
-//detects movement of the snake
-void Snake::move(double & xPos, double & yPos)
+Direction Snake::direction(Direction dir)
 {
-	if (dir == UP)
-	{
-		for (SnakeNode sn : snake)
-		{
-			
-			sn.bodyPart.move(0, -1);
-			yPos--;
-		}
-	}
-
-	else if (dir == DOWN)
-	{
-		for (SnakeNode sn : snake)
-		{
-			sn.bodyPart.move(0, 1);
-			yPos++;
-		}
-	}
-
-	else if (dir == LEFT)
-	{
-		for (SnakeNode sn : snake)
-		{
-			sn.bodyPart.move(-1, 0);
-			xPos--;
-		}
-	}
-	else if (dir == RIGHT)
-	{
-		for (SnakeNode sn : snake)
-		{
-			sn.bodyPart.move(1,0);
-			xPos++;
-		}
-	}
-
+	return this->dir = dir;
 }
 
-bool Snake::collide(sf::RectangleShape& topBorder, sf::RectangleShape& bottomBorder, sf::RectangleShape& leftBorder, sf::RectangleShape& rightBorder)
+
+void Snake::update()
 {
-	/*
-	Currently what I have for the collide method
-	Trying to detect if the head of the snake collides with any of the four borders
-	Tried doing this using the getGlobalBounds() of snake and seeing if it intersects with the borders
-
-	Probable causes:
-	1) Issue may be how the borders are drawn and their position is my theory
-		a)snake.front().bodyPart.getGlobalBounds().intersects(leftBorder.getGlobalBounds()) returns true
-		b) may be an issue with how the border is drawn or where it is positioned?
-
-	*/
-
-	bool flag = false;
-	
-	
-	if (snake.front().bodyPart.getGlobalBounds().intersects(topBorder.getGlobalBounds())||
-		snake.front().bodyPart.getGlobalBounds().intersects(bottomBorder.getGlobalBounds())||
-		snake.front().bodyPart.getGlobalBounds().intersects(leftBorder.getGlobalBounds())||
-		snake.front().bodyPart.getGlobalBounds().intersects(rightBorder.getGlobalBounds()))
+	//create a vector that gets the current position of the snake
+	sf::Vector2f previous = getPosition();
+	// use a switch that takes in the current direction and uodate the position accordingly
+	switch (dir)
 	{
-		flag = true;
-		
+	case Direction::Left:
+		previous += {-10, 0};
+		break;
+	case Direction::Right:
+		previous += {10, 0};
+		break;
+	case Direction::Up:
+		previous += {0, -10};
+		break;
+	case Direction::Down:
+		previous += {0,10};
+		break;
+
+	}
+	// set position to new position
+	setPosition(previous);
+
+	for (SnakeNode& sn : snake)
+	{
+		auto temp = sn.getPosition();
+		sn.setPosition(previous);
+		previous = temp;
 	}
 	
-	return flag;
+}
+
+bool Snake::collide(const Borders& borders)
+{
+
+//get the floatRect for each border 
+auto left = borders.getLeft();
+auto right = borders.getRight();
+	
+auto top = borders.getTop();
+auto bot = borders.getBottom();
+
+//get the floatRect of the head of the snake
+auto bnds = getTransform().transformRect(snake.front().bodyPart.getGlobalBounds());
+// return if there is a collision or not
+return left.intersects(bnds) || right.intersects(bnds) || top.intersects(bnds)|| bot.intersects(bnds);
 }
 
 
 
 //not complete
-void Snake::grow()
+bool Snake::collide(const Fruit& fruit)
 {
 	//if eaten grow the snake
-		
-		//to grow the snake create a new SnakeNode
-		SnakeNode newPart;
-		//link new node to the back of the snake
-		snake.insert(snake.end(), newPart);
+	
+	auto mouth = getTransform().transformRect(snake.front().bodyPart.getGlobalBounds());
+	if (mouth.intersects(fruit.bounds()))
+	{
+		auto back = snake.back().getPosition();
+		snake.emplace_back();
+		switch (dir)
+		{
+		case Direction::Left:
+			back += {10, 0};
+			break;
+		case Direction::Right:
+			back += {-10, 0};
+			break;
+		case Direction::Up:
+			back += {0, 10};
+			break;
+		case Direction::Down:
+			back += {0, -10};
+			break;
+
+		}
+
+
+
+		snake.back().setPosition(back);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+	
 	
 }
 
+void Snake::SnakeNode::draw(sf::RenderTarget & target, sf::RenderStates states) const
+{
 
+	states.transform = getTransform();
+	target.draw(bodyPart, states);
 
+}
 
-
-
+void Snake::draw(sf::RenderTarget & target, sf::RenderStates states) const
+{
+	for (auto& sn : snake)
+	{
+		target.draw(sn, getTransform());
+	}
+}

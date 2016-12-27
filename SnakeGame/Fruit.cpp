@@ -1,14 +1,20 @@
 
 #include "Fruit.h"
 
+#include "SFML\Graphics.hpp"
+#include<cstdlib>
+#include <ctime>
 
-Fruit::Fruit()
+// creates a fruit and sets the color and position
+Fruit::Fruit(sf::RenderTarget& window)
+	: fruit(5)
 {
-	fruit = drawFruit();
-	fruit.setPosition(setFruitPosition());
+
+	fruit.setFillColor(sf::Color::Magenta);
+	fruit.setPosition(setFruitPosition(window));
 }
 
-sf::CircleShape Fruit::getFruit()
+sf::CircleShape& Fruit::getFruit()
 {
 	return fruit;
 }
@@ -22,20 +28,31 @@ sf::CircleShape Fruit::drawFruit()
 	return circle;
 }
 
-sf::Vector2f Fruit::setFruitPosition()
+sf::FloatRect Fruit::bounds() const
+{
+	return fruit.getGlobalBounds();
+}
+
+
+
+sf::Vector2f Fruit::setFruitPosition(sf::RenderTarget& window)
 {
 	srand(time(NULL));
 	
-	int xPos;
-	int yPos;
+	
 
-	xPos = rand() % window.getSize().x - 20;
-	yPos = rand() % window.getSize().y - 20;
+	int xPos = rand() % (window.getSize().x - 20) +20;
+	int yPos = rand() % (window.getSize().y - 20) +20;
 
-	return sf::Vector2f(xPos, yPos);
+	sf::Vector2f next(xPos, yPos);
+	
+	fruit.setPosition(next);
+
+	return next;
 }
 
-void Fruit::drawFruitToWindow(sf::RenderWindow& window)
+
+void Fruit::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
-	window.draw(fruit);
+	target.draw(fruit);
 }

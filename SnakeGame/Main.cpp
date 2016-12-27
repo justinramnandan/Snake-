@@ -1,11 +1,11 @@
 
-//#include "Window.h"
-#include "Game.h"
-//#include "Fruit.h"
 
+#include "Game.h"
+
+// main method
 int main()
 {
-	game(window);
+	game();
 
 	return 0;
 }
